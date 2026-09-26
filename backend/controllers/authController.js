@@ -2,8 +2,11 @@ import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/user.js";
 
-const JWT_SECRET =
-  process.env.JWT_SECRET || "your_super_secret_key_change_in_production";
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is required");
+}
 
 // Register a new user (default role: citizen)
 export const register = async (req, res) => {
