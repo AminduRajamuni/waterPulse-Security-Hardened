@@ -273,6 +273,11 @@ npm run dev
 PORT=5000
 NODE_ENV=development
 
+# Comma-separated list of frontend origins allowed to call the API (no '*').
+# Optional in development (defaults to http://localhost:5173,http://localhost:5174);
+# required in production, otherwise all cross-origin requests are rejected.
+CORS_ORIGINS=http://localhost:5173,http://localhost:5174
+
 # ========== DATABASE ==========
 # MongoDB Atlas URL or local MongoDB
 MONGO_URI

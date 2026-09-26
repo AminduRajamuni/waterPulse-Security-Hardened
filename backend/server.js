@@ -15,22 +15,34 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// Dynamic CORS configuration
-const getCorsOrigin = () => {
-  if (NODE_ENV === 'production') {
-    return [
-      'https://water-pulse-gamma.vercel.app',
-      'https://www.water-pulse-gamma.vercel.app',
-      process.env.CORS_ORIGIN // Allow additional origins via env variable
-    ].filter(Boolean);
+// CORS allow-list from the environment, comma-separated, e.g.
+// CORS_ORIGINS=https://app.example.com,https://www.app.example.com
+const DEV_CORS_ORIGINS = ["http://localhost:5173", "http://localhost:5174"];
+
+const getCorsOrigins = () => {
+  const origins = (process.env.CORS_ORIGINS || "")
+    .split(",")
+    .map((origin) => origin.trim().replace(/\/+$/, ""))
+    .filter(Boolean);
+
+  if (origins.includes("*")) {
+    throw new Error("CORS_ORIGINS must list explicit origins; '*' is not allowed");
   }
-  // Development: allow localhost
-  return ["http://localhost:5173", "http://localhost:5174"];
+  if (origins.length > 0) return origins;
+
+  if (NODE_ENV === 'production') {
+    // Fail closed: no cross-origin access until origins are configured
+    console.warn("CORS_ORIGINS is not set; all cross-origin requests will be rejected");
+    return [];
+  }
+  // Development: allow the local Vite frontend
+  return DEV_CORS_ORIGINS;
 };
 
 // Security headers (CSP, HSTS, X-Frame-Options, nosniff, Referrer-Policy, etc.)
 app.use(helmet());
-app.use(cors({ origin: getCorsOrigin(), credentials: true }));
+// Auth uses the Authorization header, not cookies, so credentials are not enabled
+app.use(cors({ origin: getCorsOrigins() }));
 app.use(express.json());
 
 // Auth routes
