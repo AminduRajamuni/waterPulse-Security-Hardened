@@ -43,7 +43,8 @@ const getCorsOrigins = () => {
 app.use(helmet());
 // Auth uses the Authorization header, not cookies, so credentials are not enabled
 app.use(cors({ origin: getCorsOrigins() }));
-app.use(express.json());
+// Explicit body-size cap; all request bodies are small JSON forms (no file uploads)
+app.use(express.json({ limit: "10kb" }));
 
 // Auth routes
 app.use("/api/auth", authRoutes);
