@@ -1,7 +1,7 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import { register, login, createAdminOrAuthority, getCurrentUser } from '../controllers/authController.js';
-import { verifyToken } from '../middleware/authMiddleware.js';
+import { verifyToken, checkRole } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -18,6 +18,10 @@ const createAdminLimiter = rateLimit(authRateLimitOptions);
 
 // Public routes
 router.post('/register', register);
+router.post('/login', login);
+
+// V1 fix admin only route for creating admin 
+router.post('/create-admin-authority', verifyToken, checkRole('admin'), createAdminOrAuthority);
 router.post('/login', loginLimiter, login);
 router.post('/create-admin-authority', createAdminLimiter, createAdminOrAuthority);
 
