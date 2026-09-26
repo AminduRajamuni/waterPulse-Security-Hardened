@@ -87,6 +87,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginWithGoogleCode = async (code) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.post(`${API_BASE_URL}/google/exchange`, {
+        code,
+      });
+      setToken(response.data.token);
+      setUser(response.data.user);
+      return response.data;
+    } catch (err) {
+      const message = err.response?.data?.message || "Google sign-in failed";
+      setError(message);
+      throw new Error(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = () => {
     setToken(null);
     setUser(null);
@@ -101,6 +120,7 @@ export const AuthProvider = ({ children }) => {
     initializing,
     register,
     login,
+    loginWithGoogleCode,
     logout,
     isAuthenticated: !!token,
   };
