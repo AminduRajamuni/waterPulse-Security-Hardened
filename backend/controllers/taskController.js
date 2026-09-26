@@ -90,11 +90,23 @@ export const getTasks = async (req, res) => {
  * Get a single task by ID
  * GET /api/tasks/:id
  */
+ /* V4 Security Fix: Enforce task-level authorization.
+ * The route allows only admin and authority roles.
+ * Admins can view any task, but an authority can only view a task
+ * that is assigned to their own user account.
+ */
 export const getTaskById = async (req, res) => {
   try {
     const task = await taskService.getTaskById(req.params.id);
 
-    res.status(200).json({
+    // V4 Security Fix: Prevent an authority from viewing
+    // a task assigned to another authority
+    if ( req.userRole === 'authority' && task.assignedTo._id.toString() !== req.userId ) {
+      return res.status(403).json({
+        message: 'You are not authorized to view this task'
+      });
+    }
+    return res.status(200).json({
       message: 'Task retrieved successfully',
       task
     });
