@@ -1,0 +1,13 @@
+﻿# Node modules
+node_modules/
+
+# Environment variables
+.env
+backend/.env.production
+
+# Logs (optional)
+logs/
+*.log
+
+# Jest coverage reports (auto-generated, do not commit)
+coverage/

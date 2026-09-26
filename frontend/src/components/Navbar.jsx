@@ -1,0 +1,78 @@
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+import { useState, useEffect } from 'react'
+
+export function Navbar() {
+  const navigate = useNavigate()
+  const { isAuthenticated, logout } = useAuth()
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  const handleLogout = () => {
+    logout()
+    navigate('/', { replace: true })
+  }
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY
+      setIsScrolled(scrollTop > 0)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  return (
+    <nav className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${
+      isScrolled ? 'bg-white/80 backdrop-blur-md shadow-sm' : 'bg-transparent'
+    }`}>
+      <div className="flex items-center justify-center max-w-full gap-16 px-8 py-6">
+        {/* Left Navigation Items */}
+        <ul className="flex items-center gap-12 p-0 m-0 list-none">
+          <li className="m-0">
+            <Link
+              to="/map"
+              className="no-underline text-sm font-semibold tracking-wider transition-opacity duration-300 hover:opacity-80 cursor-pointer text-[#164871]"
+            >
+              MAP
+            </Link>
+          </li>
+          <li className="m-0">
+            <Link to="/reports" className="no-underline text-sm font-semibold tracking-wider transition-opacity duration-300 hover:opacity-80 cursor-pointer text-[#164871]">
+              REPORTS
+            </Link>
+          </li>
+        </ul>
+
+        {/* Logo */}
+        <Link to="/" className="flex items-center cursor-pointer">
+          <img src="/logo.png" alt="WaterPulse Logo" className="object-contain w-auto h-12" />
+        </Link>
+
+        {/* Right Navigation Items */}
+        <ul className="flex items-center gap-12 p-0 m-0 list-none">
+          <li className="m-0">
+            <a href="#profile" className="no-underline text-sm font-semibold tracking-wider transition-opacity duration-300 hover:opacity-80 cursor-pointer text-[#164871]">
+              PROFILE
+            </a>
+          </li>
+          <li className="m-0">
+            {isAuthenticated ? (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="no-underline text-sm font-semibold tracking-wider transition-opacity duration-300 hover:opacity-80 cursor-pointer text-[#dc2626]"
+              >
+                LOGOUT
+              </button>
+            ) : (
+              <Link to="/login" className="no-underline text-sm font-semibold tracking-wider transition-opacity duration-300 hover:opacity-80 cursor-pointer text-[#608A9A]">
+                LOGIN
+              </Link>
+            )}
+          </li>
+        </ul>
+      </div>
+    </nav>
+  )
+}
