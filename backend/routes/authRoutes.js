@@ -1,6 +1,6 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
-import { register, login, createAdminOrAuthority, getCurrentUser } from '../controllers/authController.js';
+import { register, login, createAdminOrAuthority, getCurrentUser, googleAuthRedirect, googleAuthCallback, googleAuthExchange } from '../controllers/authController.js';
 import { verifyToken, checkRole } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -15,10 +15,16 @@ const authRateLimitOptions = {
 
 const loginLimiter = rateLimit(authRateLimitOptions);
 const createAdminLimiter = rateLimit(authRateLimitOptions);
+const googleExchangeLimiter = rateLimit(authRateLimitOptions);
 
 // Public routes
 router.post('/register', register);
 router.post('/login', login);
+
+// Google Sign-In/Sign-Up (OAuth2 Authorization Code + OIDC)
+router.get('/google', googleAuthRedirect);
+router.get('/google/callback', googleAuthCallback);
+router.post('/google/exchange', googleExchangeLimiter, googleAuthExchange);
 
 // V1 fix admin only route for creating admin 
 router.post('/create-admin-authority', verifyToken, checkRole('admin'), createAdminOrAuthority);

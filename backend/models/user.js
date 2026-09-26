@@ -4,18 +4,24 @@ const userSchema = new mongoose.Schema({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true }, 
-    role: { 
-        type: String, 
-        enum: ['citizen', 'authority', 'admin'], 
-        default: 'citizen' 
+    // Not required at the schema level: Google-only accounts have no password.
+    // The password/email register() flow still enforces this itself.
+    password: { type: String, required: false, default: null },
+    role: {
+        type: String,
+        enum: ['citizen', 'authority', 'admin'],
+        default: 'citizen'
     },
+    // Set when this account was linked to (or created via) Google Sign-In.
+    googleId: { type: String, unique: true, sparse: true },
     phoneNumber: {
         type: String,
-        required: true,
+        required: false,
         unique: true,
+        sparse: true, // allows multiple users without a phone number (e.g. Google sign-ups)
         validate: {
             validator: function(v) {
+                if (!v) return true;
                 // Sri Lankan mobile number regex: allows 0 or +94 prefix and ensures 10 digits
                 return /^(?:0|94|\+94)?7(?:0|1|2|4|5|6|7|8)\d{7}$/.test(v);
             },
