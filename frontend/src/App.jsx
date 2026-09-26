@@ -5,6 +5,7 @@ import { Navbar } from "./components/Navbar";
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/user/LoginPage";
 import { RegisterPage } from "./pages/user/RegisterPage";
+import { GoogleCallbackPage } from "./pages/auth/GoogleCallbackPage";
 import { HomePage } from "./pages/dashboard/HomePage";
 import { AdminDashboard } from "./pages/dashboard/AdminDashboard";
 import { AuthorityDashboard } from "./pages/dashboard/AuthorityDashboard";
@@ -57,6 +58,7 @@ function App() {
             element={isAuthenticated ? <RoleBasedRedirect /> : <RegisterPage />}
           />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
+          <Route path="/oauth/callback" element={<GoogleCallbackPage />} />
 
           {/* Citizen */}
           <Route
