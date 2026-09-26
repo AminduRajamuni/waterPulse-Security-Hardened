@@ -1,6 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
+import helmet from "helmet";
 import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
@@ -27,6 +28,8 @@ const getCorsOrigin = () => {
   return ["http://localhost:5173", "http://localhost:5174"];
 };
 
+// Security headers (CSP, HSTS, X-Frame-Options, nosniff, Referrer-Policy, etc.)
+app.use(helmet());
 app.use(cors({ origin: getCorsOrigin(), credentials: true }));
 app.use(express.json());
 
