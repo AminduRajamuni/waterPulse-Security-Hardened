@@ -81,10 +81,13 @@ router.get(
 );
 
 
-// Get reports within a radius (for map view)
+// Get reports within a radius (for map view) - admin & authority only.
+// Returns reports of every status with reporter details, so citizens must not
+// use it to read other users' reports (they use /confirmed and /my-reports).
 router.get(
   "/",
   verifyToken,
+  checkRole(["admin", "authority"]),
   getReportsByRadius
 );
 

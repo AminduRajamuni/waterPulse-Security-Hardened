@@ -139,10 +139,12 @@ export const getMyReports = async (req, res) => {
 };
 
 // Get all confirmed reports (any authenticated role)
+// Visible to every citizen, so only the reporter's first name is returned;
+// reporter email and role are not exposed to other users.
 export const getConfirmedReports = async (req, res) => {
   try {
     const reports = await ContaminationReport.find({ status: "Confirmed" })
-      .populate("reportedBy", "firstName email role");
+      .populate("reportedBy", "firstName");
 
     res.status(200).json(reports);
   } catch (error) {

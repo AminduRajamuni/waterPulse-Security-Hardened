@@ -17,7 +17,21 @@ import emailService from './emailService.js';
  */
 class NotificationService {
 
-  //  Helpers 
+  /**
+ * V6 Security Fix:
+ * Escape untrusted values before inserting them into HTML emails.
+ * This prevents user-controlled HTML from being rendered by email clients.
+ */
+_escapeHtml(value) {
+  if (value === null || value === undefined) return '';
+
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
   _fullName(user) {
     if (!user) return 'Unknown';
@@ -123,11 +137,31 @@ class NotificationService {
       return;
     }
 
-    const priorityColor = this._priorityColor(task.priority);
-    const location      = task.reportId?.address || 'Location not specified';
-    const dueDate       = this._formatDate(task.dueDate);
-    const description   = task.description || 'No additional description provided.';
-    const adminName     = this._fullName(task.assignedBy);
+const priorityColor = this._priorityColor(task.priority);
+
+const location = this._escapeHtml(
+  task.reportId?.address || 'Location not specified'
+);
+
+const dueDate = this._escapeHtml(
+  this._formatDate(task.dueDate)
+);
+
+const description = this._escapeHtml(
+  task.description || 'No additional description provided.'
+);
+
+const adminName = this._escapeHtml(
+  this._fullName(task.assignedBy)
+);
+
+const taskTitle = this._escapeHtml(
+  task.title || ''
+);
+
+const priority = this._escapeHtml(
+  task.priority || ''
+);
 
     const html = this._template('New Task Assigned — WaterPulse', `
       <h2 style="margin:0 0 4px;color:#111827;font-size:20px;">New Task Assigned</h2>
@@ -136,14 +170,14 @@ class NotificationService {
       </p>
 
       <!-- Task title -->
-      <h3 style="margin:0 0 16px;color:#1d4ed8;font-size:18px;">${task.title}</h3>
+      <h3 style="margin:0 0 16px;color:#1d4ed8;font-size:18px;">${taskTitle}</h3>
 
       <!-- Priority badge -->
       <p style="margin:0 0 20px;">
         <span style="background:${priorityColor};color:#fff;padding:4px 12px;
                      border-radius:9999px;font-size:12px;font-weight:bold;
                      text-transform:uppercase;">
-          ${task.priority} priority
+          ${priority} priority
         </span>
       </p>
 
@@ -185,10 +219,23 @@ class NotificationService {
       return;
     }
 
-    const citizenName = this._fullName(citizen);
-    const reportTitle = task.reportId?.title || 'Your report';
-    const location    = task.reportId?.address || 'the reported location';
-    const authorityName = this._fullName(task.assignedTo);
+// V6 Security Fix: Escape user-controlled report and user data
+// before inserting the values into notification HTML.
+const citizenName = this._escapeHtml(
+  this._fullName(citizen)
+);
+
+const reportTitle = this._escapeHtml(
+  task.reportId?.title || 'Your report'
+);
+
+const location = this._escapeHtml(
+  task.reportId?.address || 'the reported location'
+);
+
+const authorityName = this._escapeHtml(
+  this._fullName(task.assignedTo)
+);
 
     const html = this._template('Your Report Is Being Actioned — WaterPulse', `
       <h2 style="margin:0 0 4px;color:#111827;font-size:20px;">✅ Your Report Has Been Acknowledged</h2>
@@ -262,10 +309,24 @@ class NotificationService {
       return;
     }
 
-    const authorityName = this._fullName(task.assignedTo);
-    const completedAt   = task.completedAt
-      ? new Date(task.completedAt).toLocaleString()
-      : new Date().toLocaleString();
+// V6 Security Fix: Escape dynamic values before inserting them into HTML.
+const authorityName = this._escapeHtml(
+  this._fullName(task.assignedTo)
+);
+
+const completedAt = this._escapeHtml(
+  task.completedAt
+    ? new Date(task.completedAt).toLocaleString()
+    : new Date().toLocaleString()
+);
+
+const taskTitle = this._escapeHtml(
+  task.title || ''
+);
+
+const location = this._escapeHtml(
+  task.reportId?.address || 'N/A'
+);
 
     const html = this._template('Task Completed — WaterPulse', `
       <h2 style="margin:0 0 4px;color:#111827;font-size:20px;">✅ Task Completed</h2>
@@ -273,7 +334,7 @@ class NotificationService {
         A task assigned by you has been marked as completed.
       </p>
 
-      <h3 style="margin:0 0 20px;color:#1d4ed8;font-size:18px;">${task.title}</h3>
+      <h3 style="margin:0 0 20px;color:#1d4ed8;font-size:18px;">${taskTitle}</h3>
 
       <table width="100%" cellpadding="8" cellspacing="0"
              style="border-collapse:collapse;font-size:14px;color:#374151;margin-bottom:24px;">
@@ -287,7 +348,7 @@ class NotificationService {
         </tr>
         <tr style="background:#f9fafb;">
           <td style="border:1px solid #e5e7eb;font-weight:bold;">📍 Location</td>
-          <td style="border:1px solid #e5e7eb;">${task.reportId?.address || 'N/A'}</td>
+          <td style="border:1px solid #e5e7eb;">${location}</td>
         </tr>
       </table>
 
@@ -311,13 +372,28 @@ class NotificationService {
       return;
     }
 
-    const citizenName   = this._fullName(citizen);
-    const reportTitle   = task.reportId?.title || 'Your report';
-    const location      = task.reportId?.address || 'the reported location';
-    const authorityName = this._fullName(task.assignedTo);
-    const completedAt   = task.completedAt
-      ? new Date(task.completedAt).toLocaleString()
-      : new Date().toLocaleString();
+    // V6 Security Fix: Escape dynamic values before inserting them into HTML.
+const citizenName = this._escapeHtml(
+  this._fullName(citizen)
+);
+
+const reportTitle = this._escapeHtml(
+  task.reportId?.title || 'Your report'
+);
+
+const location = this._escapeHtml(
+  task.reportId?.address || 'the reported location'
+);
+
+const authorityName = this._escapeHtml(
+  this._fullName(task.assignedTo)
+);
+
+const completedAt = this._escapeHtml(
+  task.completedAt
+    ? new Date(task.completedAt).toLocaleString()
+    : new Date().toLocaleString()
+);
 
     const html = this._template('Issue Resolved — WaterPulse', `
       <h2 style="margin:0 0 4px;color:#111827;font-size:20px;">✅ Your Report Has Been Resolved</h2>
@@ -374,23 +450,35 @@ class NotificationService {
       return;
     }
 
+// V6 Security Fix: Escape dynamic values before inserting them into HTML.
+const taskTitle = this._escapeHtml(
+  task.title || ''
+);
+
+const location = this._escapeHtml(
+  task.reportId?.address || 'N/A'
+);
+
+const assignedByName = this._escapeHtml(
+  this._fullName(task.assignedBy)
+); 
     const html = this._template('Task Cancelled — WaterPulse', `
       <h2 style="margin:0 0 4px;color:#111827;font-size:20px;">❌ Task Cancelled</h2>
       <p style="margin:0 0 24px;color:#6b7280;font-size:14px;">
         A task previously assigned to you has been cancelled.
       </p>
 
-      <h3 style="margin:0 0 20px;color:#dc2626;font-size:18px;">${task.title}</h3>
+      <h3 style="margin:0 0 20px;color:#dc2626;font-size:18px;">${taskTitle}</h3>
 
       <table width="100%" cellpadding="8" cellspacing="0"
              style="border-collapse:collapse;font-size:14px;color:#374151;margin-bottom:24px;">
         <tr style="background:#f9fafb;">
           <td style="border:1px solid #e5e7eb;width:140px;font-weight:bold;">📍 Location</td>
-          <td style="border:1px solid #e5e7eb;">${task.reportId?.address || 'N/A'}</td>
+          <td style="border:1px solid #e5e7eb;">${location}</td>
         </tr>
         <tr>
           <td style="border:1px solid #e5e7eb;font-weight:bold;">👤 Assigned by</td>
-          <td style="border:1px solid #e5e7eb;">${this._fullName(task.assignedBy)}</td>
+          <td style="border:1px solid #e5e7eb;">${assignedByName}</td>
         </tr>
       </table>
 

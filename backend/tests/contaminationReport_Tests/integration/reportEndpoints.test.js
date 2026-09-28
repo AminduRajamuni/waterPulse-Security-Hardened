@@ -247,10 +247,9 @@ describe("Contamination Report API - Integration (Supertest)", () => {
 	describe("GET /api/reports/confirmed", () => {
 		test("should return confirmed reports for any authenticated user", async () => {
 			const mockReports = [{ _id: "1", status: "Confirmed" }];
+			const populate = jest.fn().mockResolvedValue(mockReports);
 
-			ContaminationReport.find.mockReturnValue({
-				populate: jest.fn().mockResolvedValue(mockReports)
-			});
+			ContaminationReport.find.mockReturnValue({ populate });
 
 			const res = await request(app)
 				.get("/api/reports/confirmed")
@@ -259,6 +258,8 @@ describe("Contamination Report API - Integration (Supertest)", () => {
 			expect(ContaminationReport.find).toHaveBeenCalledWith({ status: "Confirmed" });
 			expect(res.status).toBe(200);
 			expect(res.body[0].status).toBe("Confirmed");
+			// Reporter email/role must not be exposed to other users
+			expect(populate).toHaveBeenCalledWith("reportedBy", "firstName");
 		});
 	});
 
@@ -296,7 +297,7 @@ describe("Contamination Report API - Integration (Supertest)", () => {
 		test("should validate presence of lat, lng, radius", async () => {
 			const res = await request(app)
 				.get("/api/reports")
-				.set("x-test-role", "citizen");
+				.set("x-test-role", "admin");
 
 			expect(res.status).toBe(400);
 			expect(res.body.message).toMatch(/Latitude, longitude and radius required/);
@@ -311,12 +312,22 @@ describe("Contamination Report API - Integration (Supertest)", () => {
 
 			const res = await request(app)
 				.get("/api/reports")
-				.set("x-test-role", "citizen")
+				.set("x-test-role", "admin")
 				.query({ lat: 7.0, lng: 80.0, radius: 5 });
 
 			expect(ContaminationReport.find).toHaveBeenCalled();
 			expect(res.status).toBe(200);
 			expect(res.body).toHaveLength(1);
+		});
+
+		test("should forbid citizen from radius search", async () => {
+			const res = await request(app)
+				.get("/api/reports")
+				.set("x-test-role", "citizen")
+				.query({ lat: 7.0, lng: 80.0, radius: 20000 });
+
+			expect(res.status).toBe(403);
+			expect(ContaminationReport.find).not.toHaveBeenCalled();
 		});
 	});
 

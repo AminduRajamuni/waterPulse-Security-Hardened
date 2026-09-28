@@ -38,9 +38,14 @@ router.get(
 );
 
 // Get a single task by ID
+// V4 Member 1: Restrict task detail access to authorized roles.
+// Citizens must not access internal task assignment information.
+// Admins can view any task, while authorities are further restricted
+// to tasks assigned to them through an ownership check in the controller.
 router.get(
   '/:id',
   verifyToken,
+  checkRole(['admin', 'authority']),
   getTaskById
 );
 

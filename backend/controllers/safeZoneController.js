@@ -79,10 +79,13 @@ export const createSafeZone = async (req, res) => {
 // @access  Public
 // @desc    Fetch all safe zones (admin table / map)
 // ─────────────────────────────────────────────
+// V5 Security Fix: This endpoint is public, so do not expose
+// the safe-zone creator's email address. Only non-sensitive
+// creator information required by the public UI is returned.
 export const getAllSafeZones = async (req, res) => {
   try {
     const safeZones = await SafeZone.find()
-      .populate("createdBy", "firstName email role")
+      .populate("createdBy", "firstName role")
       .sort({ createdAt: -1 });
 
     res.status(200).json(safeZones);
@@ -115,6 +118,8 @@ export const getNearbySafeZones = async (req, res) => {
       return res.status(400).json({ message: "Invalid coordinates" });
     }
 
+// V5 Security Fix: Nearby safe zones are publicly accessible,
+// so sensitive creator email addresses must not be returned.
     const safeZones = await SafeZone.find({
       location: {
         $near: {
@@ -127,7 +132,7 @@ export const getNearbySafeZones = async (req, res) => {
       },
     })
       .limit(parseInt(limit))
-      .populate("createdBy", "firstName email role");
+      .populate("createdBy", "firstName role");
 
     res.status(200).json(safeZones);
   } catch (error) {
@@ -141,11 +146,13 @@ export const getNearbySafeZones = async (req, res) => {
 // @access  Public
 // @desc    Get a single safe zone by ID
 // ─────────────────────────────────────────────
+// V5 Security Fix: Individual safe-zone details are public.
+// Return only the creator information required by the public UI.
 export const getSafeZoneById = async (req, res) => {
   try {
     const safeZone = await SafeZone.findById(req.params.id).populate(
       "createdBy",
-      "firstName email role",
+      "firstName role",
     );
 
     if (!safeZone) {

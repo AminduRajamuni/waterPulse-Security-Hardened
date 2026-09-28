@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { API_BASE_URL } from '../../config/api';
 
 export const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -33,6 +34,12 @@ export const LoginPage = () => {
       setError(err.message || 'Login failed. Please try again.');
       setIsLoading(false);
     }
+  };
+
+  const handleGoogleSignIn = () => {
+    // Full page redirect (not an axios call) so the browser actually navigates
+    // to Google's consent screen and back through our backend callback.
+    window.location.href = `${API_BASE_URL}/auth/google`;
   };
 
   return (
@@ -162,6 +169,26 @@ export const LoginPage = () => {
                 className="w-full py-3 font-semibold text-white transition bg-[#2d8bba] rounded-xl hover:bg-[#3aa2cf] disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 {isLoading ? 'Signing in...' : 'Sign In'}
+              </button>
+
+              <div className="flex items-center gap-3">
+                <div className="h-px flex-1 bg-[#cddae6]" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#0e2233]/50">or</span>
+                <div className="h-px flex-1 bg-[#cddae6]" />
+              </div>
+
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                className="w-full flex items-center justify-center gap-3 py-3 font-semibold text-[#0e2233] transition bg-white border border-[#cddae6] rounded-xl hover:bg-[#eef3f8]"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="#4285F4" d="M23.49 12.27c0-.85-.08-1.67-.22-2.46H12v4.66h6.47c-.28 1.5-1.13 2.78-2.4 3.63v3.02h3.88c2.27-2.09 3.58-5.17 3.58-8.85z" />
+                  <path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.95-2.9l-3.88-3.02c-1.08.72-2.45 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.12C3.25 21.3 7.31 24 12 24z" />
+                  <path fill="#FBBC05" d="M5.27 14.27a7.2 7.2 0 0 1 0-4.54V6.61H1.27a12 12 0 0 0 0 10.78l4-3.12z" />
+                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0 7.31 0 3.25 2.7 1.27 6.61l4 3.12C6.22 6.86 8.87 4.75 12 4.75z" />
+                </svg>
+                Sign in with Google
               </button>
 
               <div className="pt-2 flex items-center justify-between gap-4 flex-wrap">
