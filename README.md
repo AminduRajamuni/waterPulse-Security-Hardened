@@ -10,8 +10,9 @@
 | Rajamuni R D A P | IT23265738 | V2, V7, Google OAuth/OIDC |
 | Weerasiri K L C H  | IT23245556 | V12, V13, V14 |
 
-## 2. Project Links
+## 2. Links
 
+- **Youtube video Link:** https://youtu.be/ITuXwPdbdZs
 - **Original project (before fixes):** https://github.com/HasarangaWeerasiri/WaterPulse
 - **Modified project (after fixes):** https://github.com/AminduRajamuni/waterPulse-Security-Hardened
 
