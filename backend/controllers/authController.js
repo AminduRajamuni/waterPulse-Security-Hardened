@@ -31,7 +31,7 @@ export const register = async (req, res) => {
     }
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: String(email) });
     if (existingUser) {
       return res.status(409).json({ message: "Email already registered" });
     }
@@ -76,12 +76,9 @@ export const register = async (req, res) => {
     });
   } catch (error) {
     console.error("Registration error:", error);
-    res
-      .status(500)
-      .json({
-        message: "Server error during registration",
-        error: error.message,
-      });
+    const body = { message: "Server error during registration" };
+    if (process.env.NODE_ENV !== "production") body.error = error.message;
+    res.status(500).json(body);
   }
 };
 
@@ -98,7 +95,7 @@ export const login = async (req, res) => {
     }
 
     // Find user by email
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: String(email) });
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
@@ -129,9 +126,9 @@ export const login = async (req, res) => {
     });
   } catch (error) {
     console.error("Login error:", error);
-    res
-      .status(500)
-      .json({ message: "Server error during login", error: error.message });
+    const body = { message: "Server error during login" };
+    if (process.env.NODE_ENV !== "production") body.error = error.message;
+    res.status(500).json(body);
   }
 };
 
@@ -164,7 +161,7 @@ export const createAdminOrAuthority = async (req, res) => {
     }
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: String(email) });
     if (existingUser) {
       return res.status(409).json({ message: "Email already registered" });
     }
@@ -201,7 +198,9 @@ export const createAdminOrAuthority = async (req, res) => {
     });
   } catch (error) {
     console.error("Create admin/authority error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    const body = { message: "Server error" };
+    if (process.env.NODE_ENV !== "production") body.error = error.message;
+    res.status(500).json(body);
   }
 };
 
@@ -406,6 +405,8 @@ export const getCurrentUser = async (req, res) => {
     res.status(200).json({ user });
   } catch (error) {
     console.error("Get current user error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    const body = { message: "Server error" };
+    if (process.env.NODE_ENV !== "production") body.error = error.message;
+    res.status(500).json(body);
   }
 };
