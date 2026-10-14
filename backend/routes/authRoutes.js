@@ -19,17 +19,17 @@ const googleExchangeLimiter = rateLimit(authRateLimitOptions);
 
 // Public routes
 router.post('/register', register);
-router.post('/login', login);
+
+// V7: rate limited login (registered once only)
+router.post('/login', loginLimiter, login);
 
 // Google Sign-In/Sign-Up (OAuth2 Authorization Code + OIDC)
 router.get('/google', googleAuthRedirect);
 router.get('/google/callback', googleAuthCallback);
 router.post('/google/exchange', googleExchangeLimiter, googleAuthExchange);
 
-// V1 fix admin only route for creating admin 
-router.post('/create-admin-authority', verifyToken, checkRole('admin'), createAdminOrAuthority);
-router.post('/login', loginLimiter, login);
-router.post('/create-admin-authority', createAdminLimiter, createAdminOrAuthority);
+// V1 + V7: admin-only route for creating admin/authority, also rate limited (registered once only)
+router.post('/create-admin-authority', createAdminLimiter, verifyToken, checkRole('admin'), createAdminOrAuthority);
 
 // Protected routes
 router.get('/me', verifyToken, getCurrentUser);
